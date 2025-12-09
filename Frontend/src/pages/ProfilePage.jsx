@@ -35,7 +35,7 @@ const ProfilePage = () => {
         
         <input type="text" value={name} onChange={(e)=>setName(e.target.value)} className='text-sm text-gray-400 p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500' placeholder='Enter your Full Name' required/>
         <textarea rows={4} value={bio} onChange={(e)=>setBio(e.target.value)} className='text-sm text-gray-400 p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500' placeholder='Hi Everyone, I am using QuickChat' required/>
-        <button className='py-3 bg-gradient-to-r from-purple-400 to-violet-600 text-white rounded-full cursor-pointer hover:from-purple-500 hover:to-violet-700 transition-all duration-300 font-medium '>Save</button>
+        <button className='py-3 bg-linear-to-r from-purple-400 to-violet-600 text-white rounded-full cursor-pointer hover:from-purple-500 hover:to-violet-700 transition-all duration-300 font-medium '>Save</button>
 
        </form>
         {/* right side */}
