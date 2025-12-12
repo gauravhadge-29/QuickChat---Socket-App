@@ -20,6 +20,33 @@ export const io = new Server(server, {
     }
 })
 
+//store online users
+export const userSocketMap = {} //{userId : socketId}
+
+//scoket.io conection handler
+
+io.on('connection',(socket)=>{
+    const userId = socket.handshake.query.userId;
+    console.log(`User connected with ID: ${userId} and socket ID: ${socket.id}`);
+    if(userId){
+        userSocketMap[userId] = socket.id;
+    }
+
+
+    //emit online users to all connected clients
+    io.emit('online-users', Object.keys(userSocketMap));
+
+    //handle disconnection
+    socket.on('disconnect',()=>{
+        console.log(`User disconnected with ID: ${userId} and socket ID: ${socket.id}`);
+        if(userId && userSocketMap[userId]){
+            delete userSocketMap[userId];
+        }   
+        //emit online users to all connected clients
+        io.emit('online-users', Object.keys(userSocketMap));
+    }); 
+})
+
 app.use(cors());
 app.use(express.json({limit:'4mb'}));
 
