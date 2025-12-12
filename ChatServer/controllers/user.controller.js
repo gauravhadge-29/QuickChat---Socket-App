@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import userModel from "../models/User";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils";
+import cloudinary from "../lib/cloudinary";
 
 
 //user signup controller
@@ -34,7 +35,7 @@ export const signUp = async (req,res)=>{
 
 
 //user login controller
-const login = async (req,res)=>{
+export const login = async (req,res)=>{
     const {email,password} = req.body;
 
     try{
@@ -68,4 +69,30 @@ const login = async (req,res)=>{
 
 export const checkAuth = async(req,res)=>{
     res.json({success:true, message : "User is authenticated", userdata : req.user});
+}
+
+
+//update profile controller
+
+export const updateProfile = async(req,res)=>{
+    
+
+    try {
+        const {fullName,bio,profilePic} = req.body;
+        const userId = req.user._id;
+        let updatedUser;
+
+        if(!profilePic){
+            updatedUser = await userModel.findByIdAndUpdate(userId, {fullName,bio}, {new : true});
+        }else{
+            const upload = await cloudinary.uploader.upload(profilePic)
+
+            const updatedUser = await userModel.findByIdAndUpdate(userId, {fullName,bio, profilePic : upload.secure_url}, {new : true});
+
+            return res.status(200).json({success:true, message : "Profile updated successfully", userdata : updatedUser} ); 
+        }
+    } catch (error) {
+        console.log("Error in updating profile",error);
+        res.status(500).json({success:false, message : "Internal Server Error"});
+    }
 }
