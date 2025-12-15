@@ -136,5 +136,10 @@ Frontend/
 
 ---
 
+## Contributing
+- Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on setup, branching, commit messages, and PR expectations.
+
+---
+
 ## License
 This project is for learning/demo purposes. No license specified.
