@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import userModel from "../models/User";
+import userModel from "../models/User.js";
 import bcrypt from "bcryptjs";
-import { generateToken } from "../lib/utils";
-import cloudinary from "../lib/cloudinary";
+import { generateToken } from "../lib/utils.js";
+import cloudinary from "../lib/cloudinary.js";
 
 
 //user signup controller
@@ -22,13 +22,14 @@ export const signUp = async (req,res)=>{
 
         const hashedPassword = await bcrypt.hash(password,salt);
 
-        const newUser = await new userModel.create({fullName,email,password:hashedPassword,bio});
+        const newUser = await userModel.create({fullName,email,password:hashedPassword,bio});
 
         const token = generateToken(newUser._id);
         return res.status(201).json({success:true, message : "User created successfully", userdata : newUser, token : token});
 
 
     } catch (error) {
+        console.log("Signup error:", error);
         return res.status(500).json({success:false, message : "Internal Server Error"});
     }
 }
@@ -61,6 +62,7 @@ export const login = async (req,res)=>{
 
     }
     catch(error){
+        console.log("Login error:", error);
         return res.status(500).json({success:false, message : "Internal Server Error"});
     }
 } 
@@ -75,19 +77,23 @@ export const checkAuth = async(req,res)=>{
 //update profile controller
 
 export const updateProfile = async(req,res)=>{
-    
 
     try {
         const {fullName,bio,profilePic} = req.body;
         const userId = req.user._id;
+        console.log("Updating profile for user:", userId);
         let updatedUser;
 
         if(!profilePic){
             updatedUser = await userModel.findByIdAndUpdate(userId, {fullName,bio}, {new : true});
+            console.log("Updated user:", updatedUser);
+            return res.status(200).json({success:true, message : "Profile updated successfully", userdata : updatedUser} );
         }else{
             const upload = await cloudinary.uploader.upload(profilePic)
 
-            const updatedUser = await userModel.findByIdAndUpdate(userId, {fullName,bio, profilePic : upload.secure_url}, {new : true});
+            updatedUser = await userModel.findByIdAndUpdate(userId, {fullName,bio, profilePic : upload.secure_url}, {new : true});
+
+            console.log("Updated user:", updatedUser);
 
             return res.status(200).json({success:true, message : "Profile updated successfully", userdata : updatedUser} ); 
         }

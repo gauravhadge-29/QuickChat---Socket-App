@@ -1,8 +1,9 @@
 //get all users expect logged in user
 
-import cloudinary from "../lib/cloudinary";
-import messageModel from "../models/Message";
-import io from '../server.js';
+import cloudinary from "../lib/cloudinary.js";
+import messageModel from "../models/Message.js";
+import userModel from "../models/User.js";
+import {io,userSocketMap} from '../server.js';
 
 export const getUsersForSidebar = async(req,res)=>{
     try {
@@ -78,7 +79,7 @@ export const sendMessage = async(req,res)=>{
             imageUrl = upload.secure_url;
         }
 
-        const newMessage = messageModel.create({
+        const newMessage = await messageModel.create({
                 senderId,
                 receiverId,
                 text,
@@ -91,6 +92,8 @@ export const sendMessage = async(req,res)=>{
                 io.to(receiverSocketId).emit('new-message', newMessage);
             }
 
+
+            console.log("New message created:", newMessage);
         return res.status(200).json({success:true, message : "Message sent successfully", newMessage : newMessage});
     } catch (error) {
         console.log("Error in sending message",error);
