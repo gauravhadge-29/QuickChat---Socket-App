@@ -1,17 +1,48 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import assets from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
+import { AuthContext } from '../context/authContext.jsx'
 
 const ProfilePage = () => {
 
   const [selectedImage, setSelectedImage] = React.useState(null);
+  const authUser = React.useContext(AuthContext).authUser;
+  const { updateProfile } = React.useContext(AuthContext);
   const navigate = useNavigate();
-  const [name,setName] = React.useState('Gaurav Hadge');
-  const [bio,setBio] = React.useState('Hi Everyone, I am using QuickChat');
+  console.log("Auth User in ProfilePage.jsx:", authUser);
+  const [name,setName] = React.useState(authUser?.fullName || '');
+  const [bio,setBio] = React.useState(authUser?.bio || '' );
+
+  
+  useEffect(()=>{
+    setName(authUser?.fullName || '');
+    setBio( authUser?.bio || '' );
+  },[authUser])
+
 
   const handleSubmit = async (e)=>{
     e.preventDefault();
-    navigate('/');
+    if(!selectedImage){
+      await updateProfile({fullName : name, bio});
+      navigate('/');
+      return;
+    }
+    const render = new FileReader();
+
+    console.log("Selected image for upload:", selectedImage);
+
+    //convert to base 64
+    render.readAsDataURL(selectedImage);
+    // console.log("Base64 Image:", base64Image);
+    render.onload = async()=>{
+      const base64Image = render.result;
+      console.log("Base64 Image:", base64Image);
+      const response = await updateProfile({fullName : name, bio, profilePic : base64Image});
+      console.log("Profile update response:", response);
+      navigate('/');
+    }
+
+    // navigate('/');
     
 
   }
@@ -33,14 +64,14 @@ const ProfilePage = () => {
           
         </div>
         
-        <input type="text" value={name} onChange={(e)=>setName(e.target.value)} className='text-sm text-gray-400 p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500' placeholder='Enter your Full Name' required/>
-        <textarea rows={4} value={bio} onChange={(e)=>setBio(e.target.value)} className='text-sm text-gray-400 p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500' placeholder='Hi Everyone, I am using QuickChat' required/>
+        <input type="text" value={name} onChange={(e)=>setName(e.target.value)} className='text-sm text-white-400 p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500' placeholder='Enter your Full Name' required/>
+        <textarea rows={4} value={bio} onChange={(e)=>setBio(e.target.value)} className='text-sm text-white-400 p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500' placeholder='Hi Everyone, I am using QuickChat' required/>
         <button className='py-3 bg-linear-to-r from-purple-400 to-violet-600 text-white rounded-full cursor-pointer hover:from-purple-500 hover:to-violet-700 transition-all duration-300 font-medium '>Save</button>
 
        </form>
         {/* right side */}
         <div className='flex justify-center'>
-          <img className='max-w-44 rounded-full aspect-square mx-10 max-sm:mt-10' src={assets.logo_icon} alt="" />
+          <img className={`max-w-44 rounded-full aspect-square mx-10 max-sm:mt-10 ${selectedImage && 'rounded-full'}`} src={authUser.profilePic || assets.logo_icon} alt="" />
         </div>
 
 
